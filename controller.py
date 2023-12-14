@@ -1,3 +1,4 @@
+import dearpygui.dearpygui as dpg
 import sqlite3
 import csv
 
@@ -24,7 +25,7 @@ def createTable(table, cursor, headers):
     cursor.execute(create_table_sql)
 
 
-def inserDataTable(file, table):
+def inserDataTable(file, table, cursor):
     """Insert data to table on database
     Arguments:
     file -- path to the csv file
@@ -40,24 +41,54 @@ def inserDataTable(file, table):
             cursor.execute(query, row)
 
 
-if __name__ == "__main__":
+dpg.create_context()
+
+dpg.create_viewport(title='Cancer Connector', width=900, height=600)
+
+with dpg.font_registry():
+    default_font = dpg.add_font("JetBrainsMonoNerdFont-Regular.ttf", 20)
+    second_font = dpg.add_font("JetBrainsMonoNerdFont-Regular.ttf", 20)
+
+def callback(sender, app_data):
+    print('OK was clicked.')
+    print("Sender: ", sender)
+    print(app_data['file_path_name'])
+
+def createTableFuente(sender, app_data):
     conn = sqlite3.connect("cancer.db")
     cursor = conn.cursor()
+    headers = getHeader(app_data['file_path_name'])
+    create_table_sql = f"""CREATE TABLE IF NOT EXISTS fuente (
+    {", ".join([f"{header} TEXT" for header in headers])})"""
+    cursor.execute(create_table_sql)
+    conn.commit()
+    conn.close()
 
-    # Paciente Table Fill with paciente.csv file
-    createTable("paciente", cursor, getHeader("paciente/paciente.csv"))
-    conn.commit()
-    inserDataTable("paciente/paciente.csv", "paciente")
-    conn.commit()
+with dpg.file_dialog(directory_selector=False, show=False, callback=createTableFuente, id="import_fuentes", width=700 ,height=400):
+    dpg.add_file_extension(".csv", color=(255, 255, 0, 255))
 
-    # Tumor Table Fill with tumor.csv file
-    createTable("tumor", cursor, getHeader("tumor/tumor.csv"))
-    conn.commit()
-    inserDataTable("tumor/tumor.csv", "tumor")
-    conn.commit()
+with dpg.file_dialog(directory_selector=False, show=False, callback=createTableFuente, id="import_pacientes", width=700 ,height=400):
+    dpg.add_file_extension(".csv", color=(255, 255, 0, 255))
 
-    # fuente Table Fill with fuente.csv file
-    createTable("fuente", cursor, getHeader("fuente/fuente.csv"))
-    conn.commit()
-    inserDataTable("fuente/fuente.csv", "fuente")
-    conn.commit()
+with dpg.file_dialog(directory_selector=False, show=False, callback=createTableFuente, id="import_tumores", width=700 ,height=400):
+    dpg.add_file_extension(".csv", color=(255, 255, 0, 255))
+
+with dpg.window(label="Fuentes", width=300, height=200):
+    dpg.bind_font(default_font)
+    dpg.add_button(label="Importar Fuentes", callback=lambda: dpg.show_item("import_fuentes"))
+
+with dpg.window(label="Pacientes", width=300, height=200, pos=(301, 0)):
+    dpg.add_button(label="Importar Pacientes", callback=lambda: dpg.show_item("import_pacientes"))
+
+with dpg.window(label="Tumores", width=300, height=200, pos=(601, 0)):
+    dpg.add_button(label="Importar Tumores", callback=lambda: dpg.show_item("import_tumores"))
+
+with dpg.window(label="Inserta datos a las tablas", width=900, height=400, pos=(0, 201), no_resize=True, no_move=True, no_close=True, no_collapse=True):
+    dpg.add_button(label="Insertar datos a Fuentes")
+    dpg.add_button(label="Insertar datos a Pacientes")
+    dpg.add_button(label="Insertar datos a Tumores")
+
+dpg.setup_dearpygui()
+dpg.show_viewport()
+dpg.start_dearpygui()
+dpg.destroy_context()
