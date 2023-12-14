@@ -64,13 +64,33 @@ def createTableFuente(sender, app_data):
     conn.commit()
     conn.close()
 
+def createTablePaciente(sender, app_data):
+    conn = sqlite3.connect("cancer.db")
+    cursor = conn.cursor()
+    headers = getHeader(app_data['file_path_name'])
+    create_table_sql = f"""CREATE TABLE IF NOT EXISTS paciente (
+    {", ".join([f"{header} TEXT" for header in headers])})"""
+    cursor.execute(create_table_sql)
+    conn.commit()
+    conn.close()
+
+def createTableTumores(sender, app_data):
+    conn = sqlite3.connect("cancer.db")
+    cursor = conn.cursor()
+    headers = getHeader(app_data['file_path_name'])
+    create_table_sql = f"""CREATE TABLE IF NOT EXISTS tumores (
+    {", ".join([f"{header} TEXT" for header in headers])})"""
+    cursor.execute(create_table_sql)
+    conn.commit()
+    conn.close()
+
 with dpg.file_dialog(directory_selector=False, show=False, callback=createTableFuente, id="import_fuentes", width=700 ,height=400):
     dpg.add_file_extension(".csv", color=(255, 255, 0, 255))
 
-with dpg.file_dialog(directory_selector=False, show=False, callback=createTableFuente, id="import_pacientes", width=700 ,height=400):
+with dpg.file_dialog(directory_selector=False, show=False, callback=createTablePaciente, id="import_pacientes", width=700 ,height=400):
     dpg.add_file_extension(".csv", color=(255, 255, 0, 255))
 
-with dpg.file_dialog(directory_selector=False, show=False, callback=createTableFuente, id="import_tumores", width=700 ,height=400):
+with dpg.file_dialog(directory_selector=False, show=False, callback=createTableTumores, id="import_tumores", width=700 ,height=400):
     dpg.add_file_extension(".csv", color=(255, 255, 0, 255))
 
 with dpg.window(label="Fuentes", width=300, height=200):
