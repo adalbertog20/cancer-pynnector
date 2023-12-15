@@ -62,6 +62,15 @@ def createTableFuente(sender, app_data):
     {", ".join([f"{header} TEXT" for header in headers])})"""
     cursor.execute(create_table_sql)
     conn.commit()
+    with open(app_data['file_path_name'], "r") as csv_file:
+        csv_reader = csv.reader(csv_file)
+        next(csv_reader)
+
+        for row in csv_reader:
+            query = f"""INSERT INTO fuente VALUES (
+            {", ".join(["?" for _ in row])})"""
+            cursor.execute(query, row)
+    conn.commit()
     conn.close()
 
 def createTablePaciente(sender, app_data):
@@ -72,6 +81,15 @@ def createTablePaciente(sender, app_data):
     {", ".join([f"{header} TEXT" for header in headers])})"""
     cursor.execute(create_table_sql)
     conn.commit()
+    with open(app_data['file_path_name'], "r") as csv_file:
+        csv_reader = csv.reader(csv_file)
+        next(csv_reader)
+
+        for row in csv_reader:
+            query = f"""INSERT INTO paciente VALUES (
+            {", ".join(["?" for _ in row])})"""
+            cursor.execute(query, row)
+    conn.commit()
     conn.close()
 
 def createTableTumores(sender, app_data):
@@ -81,6 +99,15 @@ def createTableTumores(sender, app_data):
     create_table_sql = f"""CREATE TABLE IF NOT EXISTS tumores (
     {", ".join([f"{header} TEXT" for header in headers])})"""
     cursor.execute(create_table_sql)
+    conn.commit()
+    with open(app_data['file_path_name'], "r") as csv_file:
+        csv_reader = csv.reader(csv_file)
+        next(csv_reader)
+
+        for row in csv_reader:
+            query = f"""INSERT INTO tumores VALUES (
+            {", ".join(["?" for _ in row])})"""
+            cursor.execute(query, row)
     conn.commit()
     conn.close()
 
